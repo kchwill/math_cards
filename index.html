@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>미분 개념 카드</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap">
+<style>
+/* 레이아웃: 모눈종이 위의 카드 책상. 파랑=함수, 주황=도함수, 청록=설명으로 카드 종류를 색으로 구분 */
+:root{
+  --bg:#eef2f9; --surface:#ffffff; --surface2:#f5f7fc; --ink:#14213a; --muted:#5b6880; --line:#d3dbea;
+  --f:#2450d8; --d:#cf4a0c; --e:#0b7a6e; --ok:#1c7f45; --bad:#c22727;
+  --grid:rgba(36,80,216,.07); --back:#1d2f5e; --back-ink:#c9d6ff; --back-grid:rgba(201,214,255,.14);
+  --m1:#7048e8; --m2:#0c8599; --m3:#c2255c; --m4:#4f8309; --m5:#b85f00; --m6:#1864ab;
+  --font:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --math:"STIX Two Text","Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1524; --surface:#182036; --surface2:#1f2942; --ink:#e8edf8; --muted:#9aa7c0; --line:#2f3b5a;
+  --f:#86a6ff; --d:#ff9a62; --e:#5fd4c4; --ok:#5ad08a; --bad:#ff8585;
+  --grid:rgba(134,166,255,.06); --back:#2a3a6e; --back-ink:#c3d0ff; --back-grid:rgba(195,208,255,.12);
+  --m1:#b197fc; --m2:#66d9e8; --m3:#f783ac; --m4:#a9e34b; --m5:#ffc078; --m6:#74c0fc;
+  color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f1524; --surface:#182036; --surface2:#1f2942; --ink:#e8edf8; --muted:#9aa7c0; --line:#2f3b5a;
+  --f:#86a6ff; --d:#ff9a62; --e:#5fd4c4; --ok:#5ad08a; --bad:#ff8585;
+  --grid:rgba(134,166,255,.06); --back:#2a3a6e; --back-ink:#c3d0ff; --back-grid:rgba(195,208,255,.12);
+  --m1:#b197fc; --m2:#66d9e8; --m3:#f783ac; --m4:#a9e34b; --m5:#ffc078; --m6:#74c0fc;
+  color-scheme:dark }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px}
+.wrap{max-width:1080px;margin:0 auto;padding-block:28px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:clamp(1.6rem,4vw,2.2rem);line-height:1.2;margin:0;font-weight:700;text-wrap:balance}
+h2{font-size:1.1rem;margin:0;font-weight:700}
+p{margin:0}
+.lede{color:var(--muted);max-width:60ch;margin-top:8px}
+.m{font-family:var(--math);font-size:1.12em;white-space:nowrap}
+.m i{font-style:italic}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.25}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 4px 1px}
+.frac>span:last-child{padding:1px 4px 0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--f);outline-offset:2px}
+
+.stack{display:flex;flex-direction:column;gap:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:4px;flex:1 1 150px;min-width:0}
+.field label{font-size:.82rem;font-weight:700;color:var(--muted)}
+input[type=text],textarea{font:inherit;color:var(--ink);background:var(--surface2);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+textarea{resize:vertical;min-height:84px;font-size:.9rem}
+.check{display:flex;gap:8px;align-items:center;font-size:.92rem;color:var(--muted)}
+.btn{border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 16px;font-weight:700;cursor:pointer}
+.btn:hover{border-color:var(--f)}
+.btn.primary{background:var(--f);border-color:var(--f);color:var(--surface)}
+.btn.small{padding:6px 12px;font-size:.88rem}
+.note{font-size:.88rem;color:var(--muted)}
+.err{color:var(--bad);font-weight:700;font-size:.9rem;min-height:1.4em}
+
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.mode{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mode:hover{border-color:var(--f);transform:translateY(-2px)}
+.mode .no{font-size:.75rem;font-weight:700;letter-spacing:.06em;color:var(--f)}
+.mode .nm{font-weight:700;font-size:1.05rem}
+.mode .ds{font-size:.86rem;color:var(--muted);flex:1}
+.mode .rec{font-size:.8rem;font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums}
+.mode .rec.none{color:var(--muted);font-weight:400}
+
+/* 게임 */
+.hud{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.hud .title{font-weight:700;margin-right:auto}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 12px;display:flex;gap:8px;align-items:baseline;font-variant-numeric:tabular-nums}
+.stat span{font-size:.78rem;color:var(--muted);font-weight:700}
+.stat b{font-size:1.15rem}
+.stat.low b{color:var(--bad)}
+.game-wrap{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:start}
+.board{display:flex;flex-direction:column;gap:14px;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.card{position:relative;min-height:clamp(112px,25vw,152px);border:1.5px solid var(--line);border-radius:10px;background:var(--surface);
+  padding:8px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;text-align:center;min-width:0;--tc:var(--f)}
+.card.t-d{--tc:var(--d)} .card.t-e{--tc:var(--e)}
+.card .face{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;width:100%;min-width:0}
+.card .type{font-size:.7rem;font-weight:700;letter-spacing:.05em;color:var(--tc)}
+.card .main{font-size:clamp(.95rem,2.5vw,1.25rem);line-height:1.35}
+.card .main.txt{font-size:clamp(.78rem,2vw,.92rem);line-height:1.4;text-wrap:balance}
+.card .main.big{font-family:var(--math);font-size:clamp(1.6rem,5vw,2.2rem);line-height:1.1}
+.card .at{display:block;font-size:.82rem;color:var(--muted)}
+.card svg{width:100%;max-width:150px;height:auto;display:block}
+.card.down{background-color:var(--back);border-color:var(--back);
+  background-image:linear-gradient(var(--back-grid) 1px,transparent 1px),linear-gradient(90deg,var(--back-grid) 1px,transparent 1px);background-size:14px 14px}
+.card.down .face{visibility:hidden}
+.card.down::after{content:"f′";position:absolute;inset:0;display:grid;place-items:center;font-family:var(--math);font-style:italic;font-size:2rem;color:var(--back-ink)}
+.card.sel{border-color:var(--tc);box-shadow:0 0 0 3px color-mix(in srgb,var(--tc) 28%,transparent)}
+.card.matched{border-color:var(--mc);background:color-mix(in srgb,var(--mc) 11%,var(--surface));cursor:default}
+.card .badge{position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:var(--mc);color:var(--surface);font-size:.72rem;font-weight:700;display:grid;place-items:center}
+.card.wrong{border-color:var(--bad);animation:shake .35s}
+.card.pulse{outline:3px dashed var(--ok);outline-offset:2px}
+.card.flip{animation:flip .28s ease-out}
+@keyframes flip{from{transform:scaleX(.15)}to{transform:scaleX(1)}}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.mc1{--mc:var(--m1)}.mc2{--mc:var(--m2)}.mc3{--mc:var(--m3)}.mc4{--mc:var(--m4)}.mc5{--mc:var(--m5)}.mc6{--mc:var(--m6)}
+
+.tray{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+.tray .lab{font-size:.78rem;font-weight:700;color:var(--muted)}
+.picked{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-height:34px}
+.pick{border:1.5px solid var(--line);border-radius:6px;padding:2px 10px;background:var(--surface2);font-size:.9rem}
+.msg{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:10px;font-size:.93rem;min-height:3.2em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.msg b{font-weight:700}
+
+.side{display:flex;flex-direction:column;gap:14px}
+.side dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:6px 10px;font-variant-numeric:tabular-nums}
+.side dt{color:var(--muted);font-size:.9rem} .side dd{margin:0;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.8rem;font-weight:700;border-radius:99px;padding:3px 10px;background:color-mix(in srgb,var(--e) 14%,var(--surface));color:var(--e)}
+.legend{display:flex;flex-direction:column;gap:4px;font-size:.84rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+
+/* 결과 */
+.score-big{font-size:clamp(2.4rem,8vw,3.6rem);font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.res-grid div{background:var(--surface2);border-radius:8px;padding:10px 12px}
+.res-grid span{display:block;font-size:.78rem;color:var(--muted);font-weight:700}
+.res-grid b{font-size:1.15rem;font-variant-numeric:tabular-nums}
+
+/* 접선 실험실 */
+.lab-wrap{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;align-items:start}
+#labsvg{width:100%;height:auto;display:block;background:var(--surface2);border-radius:8px}
+.slider{display:flex;flex-direction:column;gap:2px}
+.slider label{font-weight:700;font-size:.9rem;display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--f)}
+.read{display:grid;gap:8px;font-variant-numeric:tabular-nums}
+.read div{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.read b{font-size:1.2rem}
+summary{cursor:pointer;font-weight:700}
+.tablebox{overflow-x:auto}
+.tablebox table{border-collapse:collapse;width:100%;font-size:.9rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tablebox th,.tablebox td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+.tablebox th{font-size:.78rem;color:var(--muted)}
+.tablebox .sub{color:var(--muted);font-size:.82rem}
+
+@media (max-width:860px){ .game-wrap,.lab-wrap{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:560px){ .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px} .tray{grid-template-columns:minmax(0,1fr)} }
+@media (prefers-reduced-motion:reduce){ .card.flip,.card.wrong{animation:none} .mode:hover{transform:none} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<!-- 시작 화면 -->
+<section id="v-start" class="stack">
+  <header>
+    <h1>미분 개념 카드</h1>
+    <p class="lede">함수와 도함수, 그래프와 접선의 기울기처럼 서로 연결되는 카드를 찾아 짝을 맞춥니다. 맞히면 카드가 남고, 틀리면 다시 뒤집힙니다.</p>
+  </header>
+
+  <form id="who" class="panel stack" autocomplete="off">
+    <div class="row">
+      <div class="field"><label for="sid">학번</label><input type="text" id="sid" inputmode="numeric" maxlength="8" placeholder="예: 20315"></div>
+      <div class="field"><label for="sname">이름</label><input type="text" id="sname" maxlength="12" placeholder="예: 김미분"></div>
+    </div>
+    <label class="check" for="openmode"><input type="checkbox" id="openmode"> 카드를 펼쳐 놓고 하기 (기억력 대신 개념 연결에 집중)</label>
+    <p class="err" id="whoerr" role="alert"></p>
+  </form>
+
+  <div class="stack" style="gap:10px">
+    <h2>모드를 골라 시작하세요</h2>
+    <div class="modes" id="modes"></div>
+  </div>
+
+  <div class="panel row" style="align-items:center">
+    <div style="flex:1 1 260px;min-width:0">
+      <h2>접선 실험실</h2>
+      <p class="note">두 점 사이의 간격 <span class="m"><i>h</i></span>를 줄이면 할선이 접선으로 바뀌는 모습을 직접 확인합니다.</p>
+    </div>
+    <button class="btn" id="tolab" type="button">실험실 열기</button>
+  </div>
+
+  <div class="panel stack" id="submitbox" hidden>
+    <h2>결과 제출</h2>
+    <p class="note">아래 내용을 복사해 선생님이 안내한 곳에 붙여 넣으세요. 모드별 최고 기록이 담겨 있습니다.</p>
+    <textarea id="restext" readonly></textarea>
+    <div class="row" style="align-items:center"><button class="btn primary small" id="copy1" type="button">결과 복사</button><span class="note" id="copy1msg"></span></div>
+  </div>
+
+  <details class="panel">
+    <summary>교사용: 학생 점수 확인</summary>
+    <div class="stack" style="margin-top:12px;gap:10px">
+      <p class="note">학생들이 제출한 결과를 한 줄에 한 명씩 붙여 넣으면 학번순 점수표로 정리합니다. 여러 명을 한꺼번에 붙여 넣어도 됩니다.</p>
+      <textarea id="vin" placeholder="[미분 개념 카드] 20315 김미분 | 기본 매칭 86점(정답률 86%) | 확인코드 L2KNYP"></textarea>
+      <div class="row" style="align-items:center"><button class="btn small" id="vbtn" type="button">점수표 만들기</button><b id="vout"></b></div>
+      <div class="tablebox" id="vtable" hidden></div>
+      <p class="note" id="vnote" hidden>'제출 상태'가 '내용 바뀜'이면 학생이 제출한 글의 점수나 이름이 게임이 만든 원본과 다르다는 뜻입니다.</p>
+    </div>
+  </details>
+</section>
+
+<!-- 게임 화면 -->
+<section id="v-game" class="stack" hidden>
+  <div class="hud">
+    <div class="title" id="gtitle"></div>
+    <div class="stat"><span>점수</span><b id="hscore">0</b></div>
+    <div class="stat"><span>남은 카드</span><b id="hleft">0</b></div>
+    <div class="stat" id="htimebox"><span>남은 시간</span><b id="htime">3:00</b></div>
+    <button class="btn small" id="quit" type="button">그만하기</button>
+  </div>
+  <div class="game-wrap">
+    <div class="board">
+      <div class="grid" id="grid"></div>
+      <div class="panel tray">
+        <div>
+          <div class="lab">선택한 카드</div>
+          <div class="picked" id="picked"></div>
+        </div>
+        <button class="btn" id="hint" type="button">힌트 (−5점)</button>
+        <div class="msg" id="msg" aria-live="polite"></div>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="panel">
+        <dl>
+          <dt>정답률</dt><dd id="dacc">–</dd>
+          <dt>연속 정답</dt><dd id="dstreak">0</dd>
+          <dt>최고 연속</dt><dd id="dbest">0</dd>
+          <dt>시도</dt><dd id="dtry">0</dd>
+        </dl>
+      </div>
+      <div class="panel stack" style="gap:10px">
+        <h2>학습한 개념</h2>
+        <div class="chips" id="chips"></div>
+      </div>
+      <div class="panel legend" id="legend"></div>
+    </aside>
+  </div>
+</section>
+
+<!-- 결과 화면 -->
+<section id="v-result" class="stack" hidden>
+  <header><h1 id="rtitle"></h1><p class="lede" id="rsub"></p></header>
+  <div class="panel stack">
+    <div><span class="note">이번 점수</span><div class="score-big" id="rscore">0</div></div>
+    <div class="res-grid" id="rgrid"></div>
+    <div><div class="note" style="font-weight:700;margin-bottom:6px">학습한 개념</div><div class="chips" id="rchips"></div></div>
+  </div>
+  <div class="panel stack">
+    <h2>결과 제출</h2>
+    <textarea id="restext2" readonly></textarea>
+    <div class="row" style="align-items:center"><button class="btn primary small" id="copy2" type="button">결과 복사</button><span class="note" id="copy2msg"></span></div>
+  </div>
+  <div class="row"><button class="btn primary" id="again" type="button">같은 모드 다시</button><button class="btn" id="home1" type="button">다른 모드 고르기</button></div>
+</section>
+
+<!-- 접선 실험실 -->
+<section id="v-lab" class="stack" hidden>
+  <header class="row" style="align-items:center"><div style="flex:1 1 260px"><h1>접선 실험실</h1>
+    <p class="lede"><span class="m"><i>f</i>(<i>x</i>) = <i>x</i><sup>2</sup></span> 위의 두 점 P, Q를 잇는 할선입니다. <span class="m"><i>h</i></span>를 0에 가깝게 줄여 보세요.</p></div>
+    <button class="btn" id="home2" type="button">돌아가기</button></header>
+  <div class="lab-wrap">
+    <div class="panel"><svg id="labsvg" viewBox="0 0 400 300" role="img" aria-label="이차함수 그래프와 할선, 접선"></svg></div>
+    <div class="panel stack">
+      <div class="slider"><label for="la">점 P의 x좌표 a <span id="lav"></span></label><input type="range" id="la" min="-1.5" max="1.5" step="0.1" value="1"></div>
+      <div class="slider"><label for="lh">두 점 사이 간격 h <span id="lhv"></span></label><input type="range" id="lh" min="0.01" max="1" step="0.01" value="1"></div>
+      <div class="read">
+        <div><span>할선의 기울기 (평균변화율)</span><b id="lsec" style="color:var(--f)"></b></div>
+        <div><span>접선의 기울기 <span class="m"><i>f</i>′(<i>a</i>)</span></span><b id="ltan" style="color:var(--d)"></b></div>
+        <div><span>두 값의 차이</span><b id="ldiff"></b></div>
+      </div>
+      <p class="note" id="lnote"></p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s)};
+function m(s){return '<span class="m">'+s.replace(/[a-z]/g,'<i>$&</i>').replace(/\^(\d+)/g,'<sup>$1</sup>')+'</span>'}
+function frac(n,d){return '<span class="frac"><span>'+n+'</span><span>'+d+'</span></span>'}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function num(n){return (n<0?'−':'')+Math.abs(n)}
+
+/* ---------- 그래프 카드 ---------- */
+function graph(fn){
+  var g='',i,x,y,d='';
+  for(i=0;i<=6;i++) g+='<line x1="'+(i*20)+'" y1="0" x2="'+(i*20)+'" y2="96"/>';
+  for(i=0;i<=8;i++) g+='<line x1="0" y1="'+(i*12)+'" x2="120" y2="'+(i*12)+'"/>';
+  for(i=0;i<=120;i++){x=-3+i*0.05;y=Math.max(-8,Math.min(8,fn(x)));d+=(i?'L':'M')+(60+x*20).toFixed(1)+' '+(48-y*12).toFixed(1)}
+  return '<svg viewBox="0 0 120 96" aria-hidden="true"><g stroke="var(--line)" stroke-width=".6" fill="none">'+g+'</g>'+
+    '<g stroke="var(--muted)" stroke-width="1.1" fill="none"><line x1="0" y1="48" x2="120" y2="48"/><line x1="60" y1="0" x2="60" y2="96"/></g>'+
+    '<text x="82" y="57" font-size="7" fill="var(--muted)" text-anchor="middle">1</text><text x="54" y="57" font-size="7" fill="var(--muted)" text-anchor="middle">O</text>'+
+    '<text x="54" y="39" font-size="7" fill="var(--muted)" text-anchor="middle">1</text>'+
+    '<path d="'+d+'" fill="none" stroke="var(--tc)" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+}
+var GR=[
+ {f:function(x){return x*x-2},d:function(x){return 2*x},
+  e:'x&lt;0에서 감소 → x&gt;0에서 증가<br>(x=0에서 극소)',tag:'증가·감소와 도함수의 부호',
+  ex:'f가 감소하는 x&lt;0에서 f′&lt;0, 증가하는 x&gt;0에서 f′&gt;0이고, 꼭짓점 x=0에서 f′=0입니다.',
+  hint:'함수가 감소하는 구간에서 도함수 그래프는 x축 아래에 있어요.'},
+ {f:function(x){return -x*x+2},d:function(x){return -2*x},
+  e:'x&lt;0에서 증가 → x&gt;0에서 감소<br>(x=0에서 극대)',tag:'극대·극소',
+  ex:'f가 증가하는 x&lt;0에서 f′&gt;0, 감소하는 x&gt;0에서 f′&lt;0입니다. f′의 부호가 +에서 −로 바뀌는 x=0에서 극대입니다.',
+  hint:'함수가 증가하는 구간에서 도함수 그래프는 x축 위에 있어요.'},
+ {f:function(x){return x*x*x-3*x},d:function(x){return 3*x*x-3},
+  e:'증가 → 감소 → 증가<br>(x=−1 극대, x=1 극소)',tag:'삼차함수의 극값',
+  ex:'f가 −1&lt;x&lt;1에서만 감소하므로 f′은 그 구간에서만 음수입니다. f′=0이 되는 x=−1, 1이 극값의 위치입니다.',
+  hint:'극대·극소가 생기는 x값에서 도함수 그래프는 x축과 만나요.'},
+ {f:function(x){return -x*x*x+3*x},d:function(x){return -3*x*x+3},
+  e:'감소 → 증가 → 감소<br>(x=−1 극소, x=1 극대)',tag:'삼차함수의 극값',
+  ex:'f가 −1&lt;x&lt;1에서만 증가하므로 f′은 그 구간에서만 양수입니다. 도함수 그래프는 위로 볼록한 포물선입니다.',
+  hint:'함수가 증가하는 구간이 어디인지 먼저 찾아보세요.'},
+ {f:function(x){return x*x*x/3},d:function(x){return x*x},
+  tag:'극값이 없는 경우',
+  ex:'f는 계속 증가하므로 f′≥0입니다. x=0에서 f′=0이지만 부호가 바뀌지 않아 극값이 아닙니다.',
+  hint:'계속 증가하는 함수의 도함수는 음수가 되지 않아요.'},
+ {f:function(x){return x},d:function(){return 1},
+  tag:'일차함수의 도함수',
+  ex:'직선은 어디서나 기울기가 같으므로 도함수는 상수함수입니다.',
+  hint:'기울기가 일정한 그래프의 도함수는 어떤 모양일까요?'}
+];
+function gcard(type,fn){return {type:type,label:type==='f'?'함수 y = f(x)':'도함수 y = f′(x)',html:graph(fn),plain:type==='f'?'함수 그래프':'도함수 그래프'}}
+
+/* ---------- 모드별 카드 묶음 ---------- */
+var POLY=[['x^2','2x'],['x^3','3x^2'],['x^2 + 3x','2x + 3'],['3x^2 − 4x + 1','6x − 4'],['x^3 − 3x','3x^2 − 3'],['5','0'],['−x^2 + 4x','−2x + 4'],['2x^3 + x','6x^2 + 1']];
+var RATE=[['x^2',3,6,'2x'],['x^2',-1,-2,'2x'],['x^3',1,3,'3x^2'],['x^2 − 4x',2,0,'2x − 4'],['x^3 − 3x',2,9,'3x^2 − 3'],['2x^2 + x',1,5,'4x + 1'],['−x^2 + 2x',3,-4,'−2x + 2'],['x^3',2,12,'3x^2']];
+var LIM='<span class="m">lim<sub><i>h</i>→0</sub></span> '+frac(m('f(a+h) − f(a)'),m('h'));
+var CONCEPT=[
+ {a:'x가 a에서 b까지 변할 때의 평균변화율',b:frac(m('f(b) − f(a)'),m('b − a')),bt:false,tag:'평균변화율',
+  hint:'평균변화율은 두 점을 잇는 직선의 기울기예요.',ex:'평균변화율은 y의 변화량을 x의 변화량으로 나눈 값, 곧 두 점을 잇는 직선의 기울기입니다.'},
+ {a:'미분계수 f′(a)를 정의하는 식',b:LIM,bt:false,tag:'미분계수의 정의',
+  hint:'평균변화율에서 간격 h를 0으로 보내는 극한을 떠올려 보세요.',ex:'미분계수는 평균변화율의 극한입니다. 간격 h가 0에 가까워질 때의 값이에요.'},
+ {a:'f′(a)가 그래프에서 뜻하는 것',b:'점 (a, f(a))에서 그은 접선의 기울기',bt:true,tag:'접선의 기울기',
+  hint:'할선에서 두 점이 한없이 가까워지면 무엇이 될까요?',ex:'미분계수 f′(a)는 곡선 위의 점 (a, f(a))에서의 접선의 기울기와 같습니다.'},
+ {a:'f′(x) &gt; 0 인 구간',b:'f(x)가 증가하는 구간',bt:true,tag:'도함수의 부호와 증가',
+  hint:'접선의 기울기가 양수이면 그래프는 어느 쪽으로 향할까요?',ex:'도함수가 양수이면 접선이 오른쪽 위를 향하므로 함수는 증가합니다.'},
+ {a:'f′(x) &lt; 0 인 구간',b:'f(x)가 감소하는 구간',bt:true,tag:'도함수의 부호와 감소',
+  hint:'접선의 기울기가 음수이면 그래프는 어느 쪽으로 향할까요?',ex:'도함수가 음수이면 접선이 오른쪽 아래를 향하므로 함수는 감소합니다.'},
+ {a:'미분가능한 f(x)가 x=a에서 극값을 가질 때',b:m('f′(a) = 0'),bt:false,tag:'극값과 미분계수',
+  hint:'봉우리나 골짜기에서 접선은 어떤 모양일까요?',ex:'극값을 갖는 점에서 접선은 x축과 평행하므로 f′(a)=0입니다.'},
+ {a:'f′(x)의 부호가 +에서 −로 바뀌는 점',b:'극대',bt:true,tag:'극대',
+  hint:'증가하다가 감소로 바뀌는 곳은 봉우리일까요, 골짜기일까요?',ex:'증가하다가 감소로 바뀌는 점이므로 극대입니다.'},
+ {a:'f′(x)의 부호가 −에서 +로 바뀌는 점',b:'극소',bt:true,tag:'극소',
+  hint:'감소하다가 증가로 바뀌는 곳은 봉우리일까요, 골짜기일까요?',ex:'감소하다가 증가로 바뀌는 점이므로 극소입니다.'}
+];
+var POLYHINT='<span class="m"><i>x</i><sup><i>n</i></sup></span>을 미분하면 <span class="m"><i>n</i><i>x</i><sup><i>n</i>−1</sup></span>, 상수는 0이 됩니다. 항마다 따로 미분하세요.';
+
+var MODES=[
+ {id:'basic',no:'모드 1',name:'기본 매칭',desc:'함수 카드와 도함수 카드를 연결합니다.',size:2,time:180,
+  legend:[['f','함수 f(x)'],['d','도함수 f′(x)']],
+  build:function(){return shuffle(POLY).slice(0,6).map(function(p){return {
+    tag:p[0]==='5'?'상수함수의 미분':'다항함수의 미분',hint:POLYHINT,
+    ex:m('f(x) = '+p[0])+' 을 미분하면 '+m('f′(x) = '+p[1])+' 입니다.',
+    cards:[{type:'f',label:'함수',html:m('f(x) = '+p[0]),plain:'f(x) = '+p[0]},{type:'d',label:'도함수',html:m('f′(x) = '+p[1]),plain:'f′(x) = '+p[1]}]}})}},
+ {id:'graph',no:'모드 2',name:'그래프 해석',desc:'함수의 그래프와 도함수의 그래프를 연결합니다.',size:2,time:180,
+  legend:[['f','함수의 그래프'],['d','도함수의 그래프']],
+  build:function(){return GR.map(function(g){return {tag:g.tag,hint:g.hint,ex:g.ex,cards:[gcard('f',g.f),gcard('d',g.d)]}})}},
+ {id:'rate',no:'모드 3',name:'순간변화율',desc:'함수와 x값을 보고 그 점에서의 접선의 기울기를 찾습니다.',size:2,time:180,
+  legend:[['f','함수와 x값'],['d','접선의 기울기']],
+  build:function(){return shuffle(RATE).slice(0,6).map(function(r){return {
+    tag:r[2]===0?'기울기가 0인 접선':'미분계수 구하기',hint:'먼저 도함수 f′(x)를 구한 다음 x값을 대입하세요.',
+    ex:m('f′(x) = '+r[3])+' 이므로 '+m('f′('+num(r[1])+') = '+num(r[2]))+' 입니다.',
+    cards:[{type:'f',label:'함수와 x값',html:m('f(x) = '+r[0])+'<span class="at">'+m('x = '+num(r[1]))+' 에서</span>',plain:'f(x) = '+r[0]+', x = '+num(r[1])},
+           {type:'d',label:'접선의 기울기',html:num(r[2]),big:true,plain:'기울기 '+num(r[2])}]}})}},
+ {id:'concept',no:'모드 4',name:'개념 설명',desc:'설명 카드와 그에 맞는 식 또는 표현을 연결합니다.',size:2,time:180,
+  legend:[['e','설명'],['d','식 또는 표현']],
+  build:function(){return shuffle(CONCEPT).slice(0,6).map(function(c){return {tag:c.tag,hint:c.hint,ex:c.ex,
+    cards:[{type:'e',label:'설명',html:c.a,txt:true,plain:c.a.replace(/&gt;/g,'>').replace(/&lt;/g,'<')},
+           {type:'d',label:'식 · 표현',html:c.b,txt:c.bt,plain:c.bt?c.b:'식 카드'}]}})}},
+ {id:'chain',no:'모드 5',name:'연쇄 매칭',desc:'함수 그래프 → 도함수 그래프 → 증가·감소 설명, 세 장을 한 묶음으로 찾습니다.',size:3,time:240,
+  legend:[['f','함수의 그래프'],['d','도함수의 그래프'],['e','증가·감소 설명']],
+  build:function(){return GR.slice(0,4).map(function(g){return {tag:g.tag,hint:g.hint,ex:g.ex,
+    cards:[gcard('f',g.f),gcard('d',g.d),{type:'e',label:'증가·감소',html:g.e,txt:true,plain:'증가·감소 설명'}]}})}}
+];
+
+/* ---------- 기록 ---------- */
+var recs={};
+try{recs=JSON.parse(localStorage.getItem('dcard-recs')||'{}')||{}}catch(e){recs={}}
+function saveRecs(){try{localStorage.setItem('dcard-recs',JSON.stringify(recs))}catch(e){}}
+try{$('#sid').value=localStorage.getItem('dcard-sid')||'';$('#sname').value=localStorage.getItem('dcard-name')||''}catch(e){}
+function code(s){var h=5381,t=s+'|dx-cards',i;for(i=0;i<t.length;i++)h=((h*33)^t.charCodeAt(i))>>>0;return ('000000'+h.toString(36).toUpperCase()).slice(-6)}
+function resultLine(){
+  var parts=MODES.filter(function(x){return recs[x.id]}).map(function(x){var r=recs[x.id];return x.name+' '+r.score+'점(정답률 '+r.acc+'%'+(r.clear?'':', 미완료')+')'});
+  if(!parts.length) return '';
+  var base='[미분 개념 카드] '+$('#sid').value.trim()+' '+$('#sname').value.trim()+' | '+parts.join(' · ');
+  return base+' | 확인코드 '+code(base);
+}
+function copyFrom(ta,out){
+  function done(){out.textContent='복사했습니다.'}
+  function fallback(){ta.focus();ta.select();out.textContent='글자를 선택해 두었습니다. 직접 복사해 주세요.'}
+  try{navigator.clipboard.writeText(ta.value).then(done,fallback)}catch(e){fallback()}
+}
+
+/* ---------- 화면 전환 ---------- */
+var views=['start','game','result','lab'];
+function show(v){views.forEach(function(n){$('#v-'+n).hidden=(n!==v)});window.scrollTo(0,0)}
+function renderStart(){
+  $('#modes').innerHTML='';
+  MODES.forEach(function(md){
+    var b=document.createElement('button');b.type='button';b.className='mode';
+    var r=recs[md.id];
+    b.innerHTML='<span class="no">'+md.no+'</span><span class="nm">'+md.name+'</span><span class="ds">'+md.desc+'</span>'+
+      '<span class="rec'+(r?'':' none')+'">'+(r?'최고 '+r.score+'점 · 정답률 '+r.acc+'%':'카드 12장 · '+(md.time/60)+'분')+'</span>';
+    b.addEventListener('click',function(){start(md)});
+    $('#modes').appendChild(b);
+  });
+  var line=resultLine();$('#submitbox').hidden=!line;$('#restext').value=line;$('#copy1msg').textContent='';
+}
+
+/* ---------- 게임 ---------- */
+var S=null,timer=null;
+function start(md){
+  var id=$('#sid').value.trim(),nm=$('#sname').value.trim();
+  if(!id||!nm){$('#whoerr').textContent='학번과 이름을 먼저 입력해 주세요.';$(!id?'#sid':'#sname').focus();return}
+  $('#whoerr').textContent='';
+  try{localStorage.setItem('dcard-sid',id);localStorage.setItem('dcard-name',nm)}catch(e){}
+  var groups=md.build(),cards=[];
+  groups.forEach(function(g,gi){g.cards.forEach(function(c){c.g=gi;cards.push(c)})});
+  S={md:md,groups:groups,cards:shuffle(cards),sel:[],done:0,score:0,tries:0,right:0,streak:0,best:0,left:md.time,lock:false,
+     open:$('#openmode').checked,tags:[],over:false};
+  S.cards.forEach(function(c){c.up=S.open;c.matched=0});
+  $('#gtitle').textContent=md.no+' · '+md.name;
+  $('#legend').innerHTML=md.legend.map(function(l){return '<span><i style="background:var(--'+l[0]+')"></i>'+l[1]+'</span>'}).join('');
+  buildGrid();setMsg('','서로 연결되는 카드 '+md.size+'장을 골라 보세요.');hud();
+  show('game');
+  clearInterval(timer);timer=setInterval(tick,1000);
+}
+function buildGrid(){
+  var grid=$('#grid');grid.innerHTML='';
+  S.cards.forEach(function(c,i){
+    var b=document.createElement('button');b.type='button';b.className='card t-'+c.type;
+    b.innerHTML='<span class="face"><span class="type">'+c.label+'</span><span class="main'+(c.txt?' txt':'')+(c.big?' big':'')+'">'+c.html+'</span></span>';
+    b.addEventListener('click',function(){pick(i)});
+    c.el=b;grid.appendChild(b);paint(i);
+  });
+}
+function paint(i){
+  var c=S.cards[i],el=c.el;
+  el.classList.toggle('down',!c.up);
+  el.classList.toggle('sel',S.sel.indexOf(i)>=0);
+  el.setAttribute('aria-label',c.up?(c.label+': '+c.plain):('뒤집힌 카드 '+(i+1)));
+  if(c.matched&&!el.classList.contains('matched')){
+    el.classList.add('matched','mc'+c.matched);el.disabled=true;
+    var bd=document.createElement('span');bd.className='badge';bd.textContent=c.matched;el.appendChild(bd);
+  }
+}
+function flip(i){var el=S.cards[i].el;el.classList.remove('flip');void el.offsetWidth;el.classList.add('flip')}
+function setMsg(kind,html){var e=$('#msg');e.className='msg'+(kind?' '+kind:'');e.innerHTML=html}
+function hud(){
+  $('#hscore').textContent=S.score;
+  $('#hleft').textContent=S.cards.length-S.done*S.md.size;
+  var t=Math.max(0,S.left);$('#htime').textContent=Math.floor(t/60)+':'+('0'+(t%60)).slice(-2);
+  $('#htimebox').classList.toggle('low',t<=30);
+  $('#dacc').textContent=S.tries?Math.round(S.right/S.tries*100)+'%':'–';
+  $('#dstreak').textContent=S.streak;$('#dbest').textContent=S.best;$('#dtry').textContent=S.tries;
+  $('#chips').innerHTML=S.tags.length?S.tags.map(function(t){return '<span class="chip">'+t+'</span>'}).join(''):'<span class="note">짝을 맞히면 여기에 개념이 쌓입니다.</span>';
+  $('#picked').innerHTML=S.sel.length?S.sel.map(function(i){var c=S.cards[i];return '<span class="pick">'+(c.html.indexOf('<svg')>=0?c.plain:c.html)+'</span>'}).join(''):'<span class="note">아직 고른 카드가 없습니다.</span>';
+}
+function tick(){
+  if(!S||S.over) return;
+  S.left--;hud();
+  if(S.left<=0) finish(false);
+}
+function pick(i){
+  if(!S||S.over||S.lock) return;
+  var c=S.cards[i];if(c.matched) return;
+  var at=S.sel.indexOf(i);
+  if(at>=0){S.sel.splice(at,1);if(!S.open){c.up=false;flip(i)}paint(i);hud();return}
+  S.sel.push(i);if(!c.up){c.up=true;flip(i)}paint(i);hud();
+  if(S.sel.length===S.md.size) judge();
+}
+function judge(){
+  var sel=S.sel.slice(),cs=sel.map(function(i){return S.cards[i]});
+  S.tries++;
+  var same=cs.every(function(c){return c.g===cs[0].g});
+  if(same){
+    var g=S.groups[cs[0].g];S.done++;S.right++;S.streak++;S.best=Math.max(S.best,S.streak);
+    var bonus=Math.min(10,(S.streak-1)*2);S.score+=10+bonus;
+    cs.forEach(function(c){c.matched=((S.done-1)%6)+1});
+    if(S.tags.indexOf(g.tag)<0) S.tags.push(g.tag);
+    S.sel=[];sel.forEach(paint);
+    setMsg('ok','<b>정답!</b> '+g.ex+(bonus?' <b>(연속 보너스 +'+bonus+')</b>':''));
+    hud();
+    if(S.done===S.groups.length) setTimeout(function(){finish(true)},900);
+  }else{
+    S.streak=0;S.score=Math.max(0,S.score-2);S.lock=true;
+    var types={},dup=false;cs.forEach(function(c){if(types[c.type])dup=true;types[c.type]=1});
+    var why=dup?'같은 종류의 카드끼리는 짝이 될 수 없습니다. 색이 다른 카드를 연결하세요.':S.groups[cs[0].g].hint;
+    setMsg('bad','<b>짝이 아닙니다.</b> '+why);
+    sel.forEach(function(i){S.cards[i].el.classList.add('wrong')});
+    hud();
+    setTimeout(function(){
+      if(!S) return;
+      sel.forEach(function(i){var c=S.cards[i];c.el.classList.remove('wrong');if(!S.open){c.up=false;flip(i)}});
+      S.sel=[];S.lock=false;sel.forEach(paint);hud();
+    },1600);
+  }
+}
+$('#hint').addEventListener('click',function(){
+  if(!S||S.over||S.lock) return;
+  if(!S.sel.length){setMsg('','먼저 카드 한 장을 고른 뒤 힌트를 눌러 주세요.');return}
+  var g=S.cards[S.sel[0]].g;S.score=Math.max(0,S.score-5);
+  setMsg('','<b>힌트.</b> '+S.groups[g].hint+' 짝 카드의 위치를 잠깐 표시합니다.');
+  S.cards.forEach(function(c,i){if(c.g===g&&S.sel.indexOf(i)<0){c.el.classList.add('pulse');setTimeout(function(){c.el.classList.remove('pulse')},1500)}});
+  hud();
+});
+function finish(clear){
+  if(!S||S.over) return;
+  S.over=true;clearInterval(timer);
+  var tb=clear?Math.floor(S.left/5):0;S.score+=tb;
+  var acc=S.tries?Math.round(S.right/S.tries*100):0,used=S.md.time-Math.max(0,S.left);
+  var old=recs[S.md.id];
+  if(!old||S.score>old.score){recs[S.md.id]={score:S.score,acc:acc,clear:clear};saveRecs()}
+  $('#rtitle').textContent=clear?'모든 카드를 연결했습니다':'시간이 끝났습니다';
+  $('#rsub').textContent=S.md.no+' · '+S.md.name+(clear?' · 남은 시간 보너스 +'+tb+'점':' · 맞힌 묶음 '+S.done+' / '+S.groups.length);
+  $('#rscore').textContent=S.score;
+  $('#rgrid').innerHTML=[['정답률',acc+'%'],['시도',S.tries+'회'],['최고 연속',S.best+'회'],['걸린 시간',Math.floor(used/60)+'분 '+(used%60)+'초']]
+    .map(function(x){return '<div><span>'+x[0]+'</span><b>'+x[1]+'</b></div>'}).join('');
+  $('#rchips').innerHTML=S.tags.length?S.tags.map(function(t){return '<span class="chip">'+t+'</span>'}).join(''):'<span class="note">이번에는 맞힌 묶음이 없습니다.</span>';
+  $('#restext2').value=resultLine();$('#copy2msg').textContent='';
+  show('result');
+}
+$('#quit').addEventListener('click',function(){clearInterval(timer);S=null;renderStart();show('start')});
+$('#again').addEventListener('click',function(){start(S.md)});
+$('#home1').addEventListener('click',function(){S=null;renderStart();show('start')});
+$('#who').addEventListener('submit',function(e){e.preventDefault()});
+$('#copy1').addEventListener('click',function(){$('#restext').value=resultLine();copyFrom($('#restext'),$('#copy1msg'))});
+$('#copy2').addEventListener('click',function(){copyFrom($('#restext2'),$('#copy2msg'))});
+$('#vbtn').addEventListener('click',function(){
+  var out=$('#vout'),box=$('#vtable'),k=' | 확인코드 ';
+  var lines=$('#vin').value.split(/\n+/).map(function(s){return s.trim()}).filter(Boolean);
+  out.style.color='var(--muted)';
+  if(!lines.length){out.textContent='제출된 결과를 붙여 넣어 주세요.';box.hidden=true;$('#vnote').hidden=true;return}
+  var rows=[],skipped=0;
+  lines.forEach(function(t){
+    var p=t.lastIndexOf(k),head=t.match(/^\[미분 개념 카드\] (\S+) (.*?) \| (.+)$/);
+    if(p<0||!head){skipped++;return}
+    var base=t.slice(0,p),hm=base.match(/^\[미분 개념 카드\] (\S+) (.*?) \| (.+)$/);
+    if(!hm){skipped++;return}
+    var r={sid:hm[1],name:hm[2],sc:{},sum:0,ok:code(base)===t.slice(p+k.length).trim().toUpperCase()};
+    hm[3].split(' · ').forEach(function(part){
+      var x=part.match(/^(.+) (\d+)점\(정답률 (\d+)%(, 미완료)?\)$/);
+      if(x){r.sc[x[1]]={s:+x[2],a:+x[3],inc:!!x[4]};r.sum+=+x[2]}
+    });
+    rows.push(r);
+  });
+  rows.sort(function(a,b){return a.sid.localeCompare(b.sid,'ko',{numeric:true})});
+  if(!rows.length){out.textContent='읽을 수 있는 결과가 없습니다. 학생이 복사한 줄 전체를 붙여 넣어 주세요.';box.hidden=true;$('#vnote').hidden=true;return}
+  var esc=function(s){return s.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})};
+  var h='<table><thead><tr><th>학번</th><th>이름</th>'+MODES.map(function(x){return '<th>'+x.name+'</th>'}).join('')+'<th>합계</th><th>제출 상태</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    h+='<tr><td>'+esc(r.sid)+'</td><td>'+esc(r.name)+'</td>'+MODES.map(function(x){var c=r.sc[x.name];
+      return '<td>'+(c?'<b>'+c.s+'</b>점 <span class="sub">'+c.a+'%'+(c.inc?' · 미완료':'')+'</span>':'<span class="sub">–</span>')+'</td>'}).join('')+
+      '<td><b>'+r.sum+'</b></td><td style="color:var(--'+(r.ok?'ok':'bad')+');font-weight:700">'+(r.ok?'정상':'내용 바뀜')+'</td></tr>';
+  });
+  box.innerHTML=h+'</tbody></table>';box.hidden=false;$('#vnote').hidden=false;
+  out.textContent=rows.length+'명 정리했습니다.'+(skipped?' 형식이 달라 읽지 못한 줄 '+skipped+'개.':'');
+});
+
+/* ---------- 접선 실험실 ---------- */
+function lab(){
+  var a=parseFloat($('#la').value),h=parseFloat($('#lh').value);
+  var X=function(x){return 200+x*56},Y=function(y){return 250-y*36},f=function(x){return x*x};
+  var s='',i,x,d='';
+  for(i=-3;i<=3;i++) s+='<line x1="'+X(i)+'" y1="0" x2="'+X(i)+'" y2="300"/>';
+  for(i=-1;i<=6;i++) s+='<line x1="0" y1="'+Y(i)+'" x2="400" y2="'+Y(i)+'"/>';
+  for(i=0;i<=140;i++){x=-3.5+i*0.05;d+=(i?'L':'M')+X(x).toFixed(1)+' '+Y(f(x)).toFixed(1)}
+  var ms=2*a+h,mt=2*a,fa=f(a),q=a+h;
+  function line(mm,col,dash){return '<line x1="'+X(-4)+'" y1="'+Y(fa+mm*(-4-a))+'" x2="'+X(4)+'" y2="'+Y(fa+mm*(4-a))+'" stroke="'+col+'" stroke-width="2"'+(dash?' stroke-dasharray="6 5"':'')+'/>'}
+  $('#labsvg').innerHTML='<g stroke="var(--line)" stroke-width="1" fill="none">'+s+'</g>'+
+    '<g stroke="var(--muted)" stroke-width="1.4" fill="none"><line x1="0" y1="'+Y(0)+'" x2="400" y2="'+Y(0)+'"/><line x1="'+X(0)+'" y1="0" x2="'+X(0)+'" y2="300"/></g>'+
+    '<path d="'+d+'" fill="none" stroke="var(--ink)" stroke-width="2.4"/>'+
+    line(mt,'var(--d)',true)+line(ms,'var(--f)',false)+
+    '<circle cx="'+X(a)+'" cy="'+Y(fa)+'" r="6" fill="var(--d)"/><circle cx="'+X(q)+'" cy="'+Y(f(q))+'" r="6" fill="var(--f)"/>'+
+    '<text x="'+(X(a)-16)+'" y="'+(Y(fa)-10)+'" font-size="15" font-weight="700" fill="var(--d)">P</text>'+
+    '<text x="'+(X(q)+10)+'" y="'+(Y(f(q))+5)+'" font-size="15" font-weight="700" fill="var(--f)">Q</text>'+
+    '<text x="'+(X(1)-4)+'" y="'+(Y(0)+16)+'" font-size="12" fill="var(--muted)">1</text><text x="'+(X(0)-14)+'" y="'+(Y(1)+4)+'" font-size="12" fill="var(--muted)">1</text>';
+  $('#lav').textContent=num(+a.toFixed(1));$('#lhv').textContent=h.toFixed(2);
+  $('#lsec').textContent=num(+ms.toFixed(2));$('#ltan').textContent=num(+mt.toFixed(2));$('#ldiff').textContent=h.toFixed(2);
+  $('#lnote').textContent=h<=0.05?'할선(파란 실선)이 접선(주황 점선)과 거의 겹쳤습니다. 평균변화율의 극한이 미분계수입니다.':'파란 실선이 할선, 주황 점선이 점 P에서의 접선입니다. 이 함수에서는 두 기울기의 차이가 정확히 h입니다.';
+}
+$('#la').addEventListener('input',lab);$('#lh').addEventListener('input',lab);
+$('#tolab').addEventListener('click',function(){lab();show('lab')});
+$('#home2').addEventListener('click',function(){show('start')});
+
+renderStart();
+})();
+</script>
+</body>
+</html>
